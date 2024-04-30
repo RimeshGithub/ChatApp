@@ -132,9 +132,11 @@ section {
 
 .posts-section {
     display: flex;
+    position: fixed;
     flex-direction: column;
     gap: 1em;
 	margin-bottom: 1.8em;
+    bottom: 10px;
 }
 
 /* == Posts Section - Filters == */
