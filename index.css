@@ -33,7 +33,7 @@ html, body {
 
 body {
     color: var(--dark-color);
-    background-color: var(--secondary-light-color);
+    background-color: teal;
     font-family: var(--primary-font);
 }
 
