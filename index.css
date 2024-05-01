@@ -154,7 +154,7 @@ textarea {
     background: linear-gradient(#5C67F2 0%,#434aa8 70%);
     border-radius: 10px;
     color: white;
-    max-width: 400px;  
+    max-width: 500px;  
 }
 
 .post2{
@@ -164,7 +164,7 @@ textarea {
     background: lightgray;
     border-radius: 10px;
     color: black;
-    max-width: 400px; 
+    max-width: 500px; 
 }
 
 .header{
@@ -178,4 +178,16 @@ textarea {
     grid-template-columns: 100px 100px;
     column-gap: 10px;
     justify-content: flex-end;
+}
+
+.google-btn-logo {
+    width: 1.375em;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 1.875em;
 }
