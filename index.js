@@ -22,14 +22,14 @@ import { getFirestore,
 /* === Firebase Setup === */
 /* IMPORTANT: Replace this with your own firebaseConfig when doing challenges */
 const firebaseConfig = {
-    apiKey: "AIzaSyCqkOqOIfAzP7OikWdFu8WX8LdkhHjGUb8",
-    authDomain: "mydumbproject-3ca4c.firebaseapp.com",
-    databaseURL: "https://mydumbproject-3ca4c-default-rtdb.firebaseio.com",
-    projectId: "mydumbproject-3ca4c",
-    storageBucket: "mydumbproject-3ca4c.appspot.com",
-    messagingSenderId: "294009624284",
-    appId: "1:294009624284:web:8a6623a746726214058619"
-  }
+  apiKey: "AIzaSyC3JfDWRpFegL2xV5_vUmE5p_0YRrNWoU4",
+  authDomain: "fir-project-e955e.firebaseapp.com",
+  databaseURL: "https://fir-project-e955e-default-rtdb.firebaseio.com",
+  projectId: "fir-project-e955e",
+  storageBucket: "fir-project-e955e.appspot.com",
+  messagingSenderId: "67657787043",
+  appId: "1:67657787043:web:ea8982f313ffd57e910116"
+}
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
@@ -56,52 +56,32 @@ const signOutButtonEl = document.getElementById("sign-out-btn")
 const userProfilePictureEl = document.getElementById("user-profile-picture")
 const userGreetingEl = document.getElementById("user-greeting")
 
-const moodEmojiEls = document.getElementsByClassName("mood-emoji-btn")
 const textareaEl = document.getElementById("post-input")
 const postButtonEl = document.getElementById("post-btn")
 
-const allFilterButtonEl = document.getElementById("all-filter-btn")
-
-const filterButtonEls = document.getElementsByClassName("filter-btn")
-
 const postsEl = document.getElementById("posts")
+const scroll = document.getElementById("posts")
 
 /* == UI - Event Listeners == */
 
 signInWithGoogleButtonEl.addEventListener("click", authSignInWithGoogle)
 
 signInButtonEl.addEventListener("click", authSignInWithEmail)
+
 createAccountButtonEl.addEventListener("click", authCreateAccountWithEmail)
 
 signOutButtonEl.addEventListener("click", authSignOut)
 
-for (let moodEmojiEl of moodEmojiEls) {
-    moodEmojiEl.addEventListener("click", selectMood)
-}
-
-for (let filterButtonEl of filterButtonEls) {
-    filterButtonEl.addEventListener("click", selectFilter)
-}
-
 postButtonEl.addEventListener("click", postButtonPressed)
 
-/* === State === */
-
-let moodState = 0
-
-/* === Global Constants === */
-
-const collectionName = "posts"
-
-/* === Main Code === */
+const collectionName = "messages"
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
         showLoggedInView()
         showProfilePicture(userProfilePictureEl, user)
         showUserGreeting(userGreetingEl, user)
-        updateFilterButtonStyle(allFilterButtonEl)
-        fetchAllPosts(user)
+        fetchAllPosts(user)    
     } else {
         showLoggedOutView()
     }
@@ -163,10 +143,11 @@ function authSignOut() {
 async function addPostToDB(postBody, user) {
     try {
         const docRef = await addDoc(collection(db, collectionName), {
-            body: postBody,
+            userName: user.displayName,
             uid: user.uid,
-            createdAt: serverTimestamp(),
-            mood: moodState
+            profilePic: user.photoURL,
+            body: postBody,
+            createdAt: serverTimestamp()
         })
         console.log("Document written with ID: ", docRef.id)
     } catch (error) {
@@ -192,69 +173,15 @@ function fetchInRealtimeAndRenderPostsFromDB(query, user) {
         clearAll(postsEl)
         
         querySnapshot.forEach((doc) => {
-            renderPost(postsEl, doc)
+            renderPost(postsEl, doc, user)
         })
     })
-}
-
-function fetchTodayPosts(user) {
-    const startOfDay = new Date()
-    startOfDay.setHours(0, 0, 0, 0)
-    
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
-    
-    const postsRef = collection(db, collectionName)
-    
-    const q = query(postsRef, where("uid", "==", user.uid),
-                              where("createdAt", ">=", startOfDay),
-                              where("createdAt", "<=", endOfDay),
-                              orderBy("createdAt", "desc"))
-                              
-    fetchInRealtimeAndRenderPostsFromDB(q, user)                  
-}
-
-function fetchWeekPosts(user) {
-    const startOfWeek = new Date()
-    startOfWeek.setHours(0, 0, 0, 0)
-    startOfWeek.setDay(0)
-    
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
-    
-    const postsRef = collection(db, collectionName)
-    
-    const q = query(postsRef, where("uid", "==", user.uid),
-                              where("createdAt", ">=", startOfWeek),
-                              where("createdAt", "<=", endOfDay),
-                              orderBy("createdAt", "desc"))
-                              
-    fetchInRealtimeAndRenderPostsFromDB(q, user)
-}
-
-function fetchMonthPosts(user) {
-    const startOfMonth = new Date()
-    startOfMonth.setHours(0, 0, 0, 0)
-    startOfMonth.setDate(1)
-
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
-
-	const postsRef = collection(db, collectionName)
-    
-    const q = query(postsRef, where("uid", "==", user.uid),
-                              where("createdAt", ">=", startOfMonth),
-                              where("createdAt", "<=", endOfDay),
-                              orderBy("createdAt", "desc"))
-
-    fetchInRealtimeAndRenderPostsFromDB(q, user)
 }
 
 function fetchAllPosts(user) {
     const postsRef = collection(db, collectionName)
     
-    const q = query(postsRef, where("uid", "==", user.uid),
-                              orderBy("createdAt", "desc"))
+    const q = query(postsRef, orderBy("createdAt", "asc"))
 
     fetchInRealtimeAndRenderPostsFromDB(q, user)
 }
@@ -269,19 +196,24 @@ function createPostHeader(postData) {
     const headerDiv = document.createElement("div")
     headerDiv.className = "header"
     
-        /* 
-            <h3>21 Sep 2023 - 14:35</h3>
-        */
-        const headerDate = document.createElement("h3")
+        const profilePicture = document.createElement("img")
+        profilePicture.className = "ppDisplay"
+        if(postData.profilePic)
+           profilePicture.src = postData.profilePic
+        else
+           profilePicture.src = `assets/images/default.jpg`
+        headerDiv.appendChild(profilePicture)
+        
+        const headerName = document.createElement("h3")
+        if(postData.userName)
+           headerName.textContent = postData.userName
+        else
+           headerName.textContent = `ChatApp User`
+        headerDiv.appendChild(headerName)
+        
+        const headerDate = document.createElement("h4")
         headerDate.textContent = displayDate(postData.createdAt)
         headerDiv.appendChild(headerDate)
-        
-        /* 
-            <img src="assets/emojis/5.png">
-        */
-        const moodImage = document.createElement("img")
-        moodImage.src = `assets/emojis/${postData.mood}.png`
-        headerDiv.appendChild(moodImage)
         
     return headerDiv
 }
@@ -348,17 +280,20 @@ function createPostFooter(wholeDoc) {
     return footerDiv
 }
 
-function renderPost(postsEl, wholeDoc) {
+function renderPost(postsEl, wholeDoc, user) {
     const postData = wholeDoc.data()
     
     const postDiv = document.createElement("div")
-    postDiv.className = "post"
+    postData.uid == user.uid ? postDiv.className = "post" : postDiv.className = "post2"
     
     postDiv.appendChild(createPostHeader(postData))
     postDiv.appendChild(createPostBody(postData))
-    postDiv.appendChild(createPostFooter(wholeDoc))
+    
+    if(postData.uid == user.uid)
+       postDiv.appendChild(createPostFooter(wholeDoc))
     
     postsEl.appendChild(postDiv)
+    scroll.scrollTop = scroll.scrollHeight
 }
 
 function replaceNewlinesWithBrTags(inputString) {
@@ -369,14 +304,9 @@ function postButtonPressed() {
     const postBody = textareaEl.value
     const user = auth.currentUser
     
-    if (postBody && moodState) {
+    if (postBody) {
         addPostToDB(postBody, user)
         clearInputField(textareaEl)
-        resetAllMoodElements(moodEmojiEls)
-    }
-
-    else if (!moodState && postBody){
-        alert("Please select a mood emoji")
     }
 }
 
@@ -424,12 +354,10 @@ function showProfilePicture(imgElement, user) {
 function showUserGreeting(element, user) {
     const displayName = user.displayName
     
-    if (displayName) {
-        const userFirstName = displayName.split(" ")[0]
-        
-        element.textContent = `Hey ${userFirstName}, how are you?`
+    if (displayName) {  
+        element.textContent = displayName
     } else {
-        element.textContent = `Hey friend, how are you?`
+        element.textContent = `ChatApp User`
     }
 }
 
@@ -452,81 +380,4 @@ function displayDate(firebaseDate) {
     minutes = minutes < 10 ? "0" + minutes : minutes
 
     return `${day} ${month} ${year} - ${hours}:${minutes}`
-}
-
-/* = Functions - UI Functions - Mood = */
-
-function selectMood(event) {
-    const selectedMoodEmojiElementId = event.currentTarget.id
-    
-    changeMoodsStyleAfterSelection(selectedMoodEmojiElementId, moodEmojiEls)
-    
-    const chosenMoodValue = returnMoodValueFromElementId(selectedMoodEmojiElementId)
-    
-    moodState = chosenMoodValue
-}
-
-function changeMoodsStyleAfterSelection(selectedMoodElementId, allMoodElements) {
-    for (let moodEmojiEl of moodEmojiEls) {
-        if (selectedMoodElementId === moodEmojiEl.id) {
-            moodEmojiEl.classList.remove("unselected-emoji")          
-            moodEmojiEl.classList.add("selected-emoji")
-        } else {
-            moodEmojiEl.classList.remove("selected-emoji")
-            moodEmojiEl.classList.add("unselected-emoji")
-        }
-    }
-}
-
-function resetAllMoodElements(allMoodElements) {
-    for (let moodEmojiEl of allMoodElements) {
-        moodEmojiEl.classList.remove("selected-emoji")
-        moodEmojiEl.classList.remove("unselected-emoji")
-    }
-    
-    moodState = 0
-}
-
-function returnMoodValueFromElementId(elementId) {
-    return Number(elementId.slice(5))
-}
-
-/* == Functions - UI Functions - Date Filters == */
-
-function resetAllFilterButtons(allFilterButtons) {
-    for (let filterButtonEl of allFilterButtons) {
-        filterButtonEl.classList.remove("selected-filter")
-    }
-}
-
-function updateFilterButtonStyle(element) {
-    element.classList.add("selected-filter")
-}
-
-function fetchPostsFromPeriod(period, user) {
-    if (period === "today") {
-        fetchTodayPosts(user)
-    } else if (period === "week") {
-        fetchWeekPosts(user)
-    } else if (period === "month") {
-        fetchMonthPosts(user)
-    } else {
-        fetchAllPosts(user)
-    }
-}
-
-function selectFilter(event) {
-    const user = auth.currentUser
-    
-    const selectedFilterElementId = event.target.id
-    
-    const selectedFilterPeriod = selectedFilterElementId.split("-")[0]
-    
-    const selectedFilterElement = document.getElementById(selectedFilterElementId)
-    
-    resetAllFilterButtons(filterButtonEls)
-    
-    updateFilterButtonStyle(selectedFilterElement)
-    
-    fetchPostsFromPeriod(selectedFilterPeriod, user)
 }
