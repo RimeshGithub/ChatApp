@@ -106,7 +106,7 @@ function authSignInWithGoogle() {
 function authSignInWithEmail() {
     const email = emailInputEl.value
     const password = passwordInputEl.value
-    unknownUser = (email.toString()).split('@')[0]
+    let unknownUser = (email.toString()).split('@')[0]
     localStorage.setItem("unknownUser",unknownUser)
     
     signInWithEmailAndPassword(auth, email, password)
