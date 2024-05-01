@@ -61,6 +61,7 @@ const postButtonEl = document.getElementById("post-btn")
 
 const postsEl = document.getElementById("posts")
 const scroll = document.getElementById("posts")
+let unknownUser
 
 /* == UI - Event Listeners == */
 
@@ -104,6 +105,8 @@ function authSignInWithGoogle() {
 function authSignInWithEmail() {
     const email = emailInputEl.value
     const password = passwordInputEl.value
+    unknownUser = (email.toString()).split('@')[0]
+    localStorage.setItem("unknownUser",unknownUser)
     
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -143,7 +146,7 @@ function authSignOut() {
 async function addPostToDB(postBody, user) {
     try {
         const docRef = await addDoc(collection(db, collectionName), {
-            userName: user.displayName,
+            userName: user.displayName ? user.displayName : localStorage.getItem("unknownUser"),
             uid: user.uid,
             profilePic: user.photoURL,
             body: postBody,
@@ -205,10 +208,8 @@ function createPostHeader(postData) {
         headerDiv.appendChild(profilePicture)
         
         const headerName = document.createElement("h3")
-        if(postData.userName)
-           headerName.textContent = postData.userName
-        else
-           headerName.textContent = `ChatApp User`
+        headerName.textContent = postData.userName
+
         headerDiv.appendChild(headerName)
         
         const headerDate = document.createElement("h4")
@@ -357,7 +358,7 @@ function showUserGreeting(element, user) {
     if (displayName) {  
         element.textContent = displayName
     } else {
-        element.textContent = `ChatApp User`
+        element.textContent = localStorage.getItem("unknownUser")
     }
 }
 
