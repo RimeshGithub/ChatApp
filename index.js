@@ -60,8 +60,6 @@ const textareaEl = document.getElementById("post-input")
 const postButtonEl = document.getElementById("post-btn")
 
 const postsEl = document.getElementById("posts")
-const scroll = document.getElementById("posts")
-let unknownUser
 
 /* == UI - Event Listeners == */
 
@@ -82,7 +80,10 @@ onAuthStateChanged(auth, (user) => {
         showLoggedInView()
         showProfilePicture(userProfilePictureEl, user)
         showUserGreeting(userGreetingEl, user)
-        fetchAllPosts(user)    
+        fetchAllPosts(user)   
+        setTimeout(() => {
+            postsEl.scrollTop = postsEl.scrollHeight
+        }, 1200)
     } else {
         showLoggedOutView()
     }
@@ -153,6 +154,7 @@ async function addPostToDB(postBody, user) {
             createdAt: serverTimestamp()
         })
         console.log("Document written with ID: ", docRef.id)
+        postsEl.scrollTop = postsEl.scrollHeight
     } catch (error) {
         console.error(error.message)
         alert(error.message)
@@ -294,7 +296,6 @@ function renderPost(postsEl, wholeDoc, user) {
        postDiv.appendChild(createPostFooter(wholeDoc))
     
     postsEl.appendChild(postDiv)
-    scroll.scrollTop = scroll.scrollHeight
 }
 
 function replaceNewlinesWithBrTags(inputString) {
