@@ -201,7 +201,7 @@ function createPostHeader(postData) {
         if(postData.profilePic)
            profilePicture.src = postData.profilePic
         else
-           profilePicture.src = `assets/images/default.jpg`
+           profilePicture.src = `assets/images/default.jpeg`
         headerDiv.appendChild(profilePicture)
         
         const headerName = document.createElement("h3")
@@ -347,7 +347,7 @@ function showProfilePicture(imgElement, user) {
     if (photoURL) {
         imgElement.src = photoURL
     } else {
-        imgElement.src = "assets/images/default-profile-picture.jpeg"
+        imgElement.src = "assets/images/default.jpeg"
     }
 }
 
