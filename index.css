@@ -144,14 +144,6 @@ textarea {
     margin-left: auto;
 }
 
-#chatter-btn{
-    margin-top: -2px;
-}
-
-#sign-out-btn{
-    margin-bottom: -2px;
-}
-
 #button-group button{
     background: none;
     border: none;
