@@ -210,7 +210,7 @@ textarea {
 #scroll-bottom-btn{
     height: 70px;
     width: 70px;
-    background: url("assets/icons/scrolldown.png") , white;
+    background: white;
     background-size: cover;
     box-shadow: 0 3px 2px rgba(0,0,0,0.1) , 0 -3px 2px rgba(0,0,0,0.1) ,
                 -3px 0 2px rgba(0,0,0,0.1) , 3px 0 2px rgba(0,0,0,0.1);
@@ -220,6 +220,11 @@ textarea {
     left: 30px;
     z-index: 1;
     cursor: pointer;
+}
+
+#scroll-bottom-btn img{
+    height: 70px;
+    width: 70px;
 }
 
 #chatter-box{
