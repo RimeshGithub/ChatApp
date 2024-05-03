@@ -61,6 +61,13 @@ const postButtonEl = document.getElementById("post-btn")
 
 const postsEl = document.getElementById("posts")
 
+const scrollButton = document.getElementById("scroll-bottom-btn")
+
+const chatterButton = document.getElementById("chatter-btn")
+const chatterBox = document.getElementById("chatter-box")
+const chatterListBox = document.getElementById("chatter-list")
+const chatterCloseButton = document.getElementById("chatter-close-btn")
+
 /* == UI - Event Listeners == */
 
 signInWithGoogleButtonEl.addEventListener("click", authSignInWithGoogle)
@@ -73,7 +80,14 @@ signOutButtonEl.addEventListener("click", authSignOut)
 
 postButtonEl.addEventListener("click", postButtonPressed)
 
+scrollButton.addEventListener("click", scrollToBottom)
+
+chatterButton.addEventListener("click", viewChattersList)
+chatterCloseButton.addEventListener("click", closeChattersList)
+
 const collectionName = "messages"
+let chatterList = []
+let updatedChatterList = []
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -82,8 +96,8 @@ onAuthStateChanged(auth, (user) => {
         showUserGreeting(userGreetingEl, user)
         fetchAllPosts(user)   
         setTimeout(() => {
-            postsEl.scrollTop = postsEl.scrollHeight
-        }, 1200)
+            scrollToBottom()
+        }, 1500)
     } else {
         showLoggedOutView()
     }
@@ -154,7 +168,7 @@ async function addPostToDB(postBody, user) {
             createdAt: serverTimestamp()
         })
         console.log("Document written with ID: ", docRef.id)
-        postsEl.scrollTop = postsEl.scrollHeight
+        scrollToBottom()
     } catch (error) {
         console.error(error.message)
         alert(error.message)
@@ -179,6 +193,7 @@ function fetchInRealtimeAndRenderPostsFromDB(query, user) {
         
         querySnapshot.forEach((doc) => {
             renderPost(postsEl, doc, user)
+            updateChatterList(doc.data())
         })
     })
 }
@@ -194,10 +209,6 @@ function fetchAllPosts(user) {
 /* == Functions - UI Functions == */
 
 function createPostHeader(postData) {
-    /*
-        <div class="header">
-        </div>
-    */
     const headerDiv = document.createElement("div")
     headerDiv.className = "header"
     
@@ -206,7 +217,7 @@ function createPostHeader(postData) {
         if(postData.profilePic)
            profilePicture.src = postData.profilePic
         else
-           profilePicture.src = `assets/images/default.jpeg`
+           profilePicture.src = "assets/images/default.jpeg"
         headerDiv.appendChild(profilePicture)
         
         const headerName = document.createElement("h3")
@@ -222,9 +233,6 @@ function createPostHeader(postData) {
 }
 
 function createPostBody(postData) {
-    /*
-        <p>This is a post</p>
-    */
     const postBody = document.createElement("p")
     postBody.innerHTML = replaceNewlinesWithBrTags(postData.body)
     
@@ -235,14 +243,10 @@ function createPostUpdateButton(wholeDoc) {
     const postId = wholeDoc.id
     const postData = wholeDoc.data()
     
-    /* 
-        <button class="edit-color">Edit</button>
-    */
     const button = document.createElement("button")
     button.textContent = "Edit"
-    button.classList.add("edit-color")
     button.addEventListener("click", function() {
-        const newBody = prompt("Edit the post", postData.body)
+        const newBody = prompt("Edit the message:", postData.body)
         
         if (newBody) {
             updatePostInDB(postId, newBody)
@@ -255,25 +259,18 @@ function createPostUpdateButton(wholeDoc) {
 function createPostDeleteButton(wholeDoc) {
     const postId = wholeDoc.id
     
-    /* 
-        <button class="delete-color">Delete</button>
-    */
     const button = document.createElement('button')
     button.textContent = 'Delete'
-    button.classList.add("delete-color")
     button.addEventListener('click', function() {
-        deletePostFromDB(postId)
+        const confirmation = confirm("Do you want to delete this message?")
+        
+        if(confirmation)
+            deletePostFromDB(postId)
     })
     return button
 }
 
 function createPostFooter(wholeDoc) {
-    /* 
-        <div class="footer">
-            <button>Edit</button>
-            <button>Delete</button>
-        </div>
-    */
     const footerDiv = document.createElement("div")
     footerDiv.className = "footer"
     
@@ -310,37 +307,6 @@ function postButtonPressed() {
         addPostToDB(postBody, user)
         clearInputField(textareaEl)
     }
-}
-
-function clearAll(element) {
-    element.innerHTML = ""
-}
-
-function showLoggedOutView() {
-    hideView(viewLoggedIn)
-    showView(viewLoggedOut)
-}
-
-function showLoggedInView() {
-    hideView(viewLoggedOut)
-    showView(viewLoggedIn)
-}
-
-function showView(view) {
-    view.style.display = "flex" 
-}
-
-function hideView(view) {
-    view.style.display = "none"
-}
-
-function clearInputField(field) {
-	field.value = ""
-}
-
-function clearAuthFields() {
-	clearInputField(emailInputEl)
-	clearInputField(passwordInputEl)
 }
 
 function showProfilePicture(imgElement, user) {
@@ -382,4 +348,93 @@ function displayDate(firebaseDate) {
     minutes = minutes < 10 ? "0" + minutes : minutes
 
     return `${day} ${month} ${year} - ${hours}:${minutes}`
+}
+
+function scrollToBottom(){
+  postsEl.scrollTo({
+            left: 0,
+            top: postsEl.scrollHeight,
+            behavior: 'smooth'
+           })
+}
+
+postsEl.addEventListener("scroll", () => {
+    if(isScrolledToBottom(postsEl))
+      scrollButton.style.display = "none"
+    else 
+      scrollButton.style.display = "block"
+})
+
+function isScrolledToBottom(element) {
+    // Calculate the current scroll position
+    const scrollPosition = element.scrollTop + element.clientHeight
+
+    // Check if the element is scrolled to the bottom with a small tolerance for rounding errors
+    return Math.abs(scrollPosition - element.scrollHeight) < 1
+}
+
+function updateChatterList(postData){
+    let profilePic = postData.profilePic ? postData.profilePic : "assets/images/default.jpeg"
+    
+    chatterList.push({name: postData.userName , profilePic: profilePic , uid: postData.uid})
+    
+    //removes duplicate objects
+    const uniqueByUid = new Map(chatterList.map(item => [item.uid, item]))
+
+    updatedChatterList = [...uniqueByUid.values()]
+}
+
+function viewChattersList(){
+    showView(chatterBox)
+    clearAll(chatterListBox)
+    
+    updatedChatterList.map((chatter) => {
+        const chatterDiv = document.createElement("div")
+        chatterDiv.className = "chatter-div"
+        
+        const chatterProfilePic = document.createElement("img")
+            chatterProfilePic.src = chatter.profilePic
+            
+        const chatterName = document.createElement("h2")
+            chatterName.textContent = chatter.name
+         
+        chatterDiv.appendChild(chatterProfilePic)         
+        chatterDiv.appendChild(chatterName)
+        chatterListBox.appendChild(chatterDiv)
+    })
+}
+
+function closeChattersList(){
+    hideView(chatterBox)
+}
+
+function clearAll(element) {
+    element.innerHTML = ""
+}
+
+function showLoggedOutView() {
+    hideView(viewLoggedIn)
+    showView(viewLoggedOut)
+}
+
+function showLoggedInView() {
+    hideView(viewLoggedOut)
+    showView(viewLoggedIn)
+}
+
+function showView(view) {
+    view.style.display = "flex" 
+}
+
+function hideView(view) {
+    view.style.display = "none"
+}
+
+function clearInputField(field) {
+	field.value = ""
+}
+
+function clearAuthFields() {
+	clearInputField(emailInputEl)
+	clearInputField(passwordInputEl)
 }

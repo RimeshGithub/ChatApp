@@ -37,9 +37,13 @@
                 <nav id="logged-in-nav">
                     <img id="user-profile-picture">
                     <h2 id="user-greeting"></h2>
-                    <button id="sign-out-btn" class="icon-btn" title="Sign out">
+                    
+                    <div id="button-group">
+                    <button id="chatter-btn" title="View Chatters"><h1>&#x1F464</h1></button>
+                    <button id="sign-out-btn" title="Sign out">
                         <img src="assets/icons/icon-sign-out.svg" class="icon-img-btn">
                     </button>
+                    </div>
                 </nav>
                 
                 <div class="app-container">
@@ -48,8 +52,16 @@
                     
                     <div class="post-section">
                         <textarea id="post-input" placeholder="Message..."></textarea>
-                        <button id="post-btn" class="primary-btn">Post</button>
+                        <button id="post-btn" class="primary-btn">Send</button>
                     </div>
+                    <div id="scroll-bottom-btn">&#8595</div>
+                </div>
+                
+                <div id="chatter-box">
+                    <h1>Chatters</h1>
+                    <div id="chatter-list">
+                    </div>
+                    <button id="chatter-close-btn" class="primary-btn">Close</button>
                 </div>
             </div>
         </section>
