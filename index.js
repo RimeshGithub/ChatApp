@@ -95,9 +95,12 @@ onAuthStateChanged(auth, (user) => {
         showProfilePicture(userProfilePictureEl, user)
         showUserGreeting(userGreetingEl, user)
         fetchAllPosts(user)   
+        closeChattersList()
+        
         setTimeout(() => {
             scrollToBottom()
         }, 1500)
+        
     } else {
         showLoggedOutView()
     }
