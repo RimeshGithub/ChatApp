@@ -149,9 +149,10 @@ textarea {
     border: none;
     cursor: pointer;
     padding: 0;
-    margin-right: 40px;
+    margin-right: 45px;
     height: 50px;
-    width: 50px;
+    width: 55px;
+    margin-top: -2px;
 }
 
 .icon-img-btn{
