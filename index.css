@@ -48,6 +48,7 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .primary-btn {
@@ -220,6 +221,8 @@ textarea {
     text-align: center;
     font-size: 50px;
     cursor: pointer;
+    text-shadow: 0 1px rgba(0,0,0) , 0 -1px rgba(0,0,0) ,
+                -1px 0 rgba(0,0,0) , 1px 0 rgba(0,0,0);
 }
 
 #chatter-box{
