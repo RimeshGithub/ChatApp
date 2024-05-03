@@ -1,0 +1,11 @@
+{
+    "name": "ChatApp",
+    "short_name": "ChatApp",
+    "icons":
+        [
+            {"src":"/assets/icons/chaticon.png","sizes":"192x192","type":"image/png"}
+        ],
+    "theme_color": "#EEF0F4",
+    "background_color": "#EEF0F4",
+    "display": "standalone"
+}
